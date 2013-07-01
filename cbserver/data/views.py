@@ -11,6 +11,8 @@ from pymongo import DESCENDING
 import pymongo
 import math
 from bson.objectid import ObjectId
+import json
+from django.views.decorators.csrf import csrf_exempt
 
 # open up 
 client = MongoClient()
@@ -18,13 +20,25 @@ db = client.data
 answer_queue = db.answer_queue
 rec_collection = db.recs
 
-def uploadAnswers(request):
+@csrf_exempt
+def uploadAnswers(request):	
+	response =  HttpResponse(str(json.dumps(request.POST)))
+	response["Access-Control-Allow-Origin"] = "*"
+	response["Access-Control-Allow-Methods"] = "POST, GET, OPTIONS"
+	response["Access-Control-Max-Age"] = "1000"
+	response["Access-Control-Allow-Headers"] = "*"
 	if request.method == 'POST':
 		# get the array of answers and loop through them and insert them to the
-		request.POST['']
-	return HttpResponse('Done')
+		allAnswers = json.loads(request.POST['data'])
+		to_insert = []
+		for current_row in allAnswers:
+			to_insert.append({"fromUser": current_row["fromUser"], "forFacebookId": current_row["forFacebookId"], "chosenProduct": current_row["chosenProduct"], "wrongProduct": current_row["wrongProduct"]})
+		if (to_insert.count > 0):
+			answer_queue.insert(to_insert)			
+		return HttpResponse('Inserted into answer queue')
+	return HttpResponse("Not a POST request")
 
-def getRecVector(request, userId)
+def getRecVector(request, userId):
 	return HttpResponse('sup')
 
 #def updateRecVector(userId, )
