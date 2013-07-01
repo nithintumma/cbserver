@@ -10,11 +10,12 @@ from pymongo import MongoClient
 from pymongo import DESCENDING
 import pymongo
 import math
+from bson.objectid import ObjectId
 
 # open up 
 client = MongoClient()
 db = client.data
-answer_collection = db.answers
+answer_queue = db.answer_queue
 rec_collection = db.recs
 
 def uploadAnswers(request):
@@ -27,6 +28,36 @@ def getRecVector(request, userId)
 	return HttpResponse('sup')
 
 #def updateRecVector(userId, )
+
+
+def processAnswerQueue(request):
+	# group the answers
+	#answer_queue.group()	
+	answer_records = answer_queue.find()
+	for answer in answer_records:
+		# find the rec for that user
+		# if it does not exist create it
+		rec = rec_collection.find_one({userId: answer.forFacebookId})
+		if rec:
+			try:
+				winning_score = rec[answer.chosenProduct]
+			except:
+				winning_score = 1600
+			try:
+				losing_score = rec[answer.wrongProduct]
+			except:
+				losing_score = 1600
+			# calculate elo scores
+			new_chosen_score, new_wrong_score = calculate_elo_rank(winning_score, losing_score)
+			rec_collection.update({'_id': ObjectId(rec._id)}, {"$set": {answer.chosenProduct: new_chosen_score, answer.wrongProduct: new_wrong_score}})	
+			
+		else:
+			new_chosen_score, new_wrong_score = calculate_elo_rank()
+			# create
+			rec_collection.insert({"userId": answer.forFacebookId, answer.wrongProduct: new_wrong_score, answer.chosenProduct: new_chosen_score})
+			
+	return HttpResponse()
+
 
 class elo_core:
 	def getExpectation(rating_1, rating_2):
