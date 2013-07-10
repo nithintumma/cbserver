@@ -19,6 +19,34 @@ client = MongoClient()
 db = client.data
 answer_queue = db.answer_queue
 rec_collection = db.recs
+top_friends = db.top_friends
+
+@csrf_exempt
+def updateTopFriends(request, user_id):
+	friends_scores = json.loads(request.POST["data"])
+	
+	scores = top_friends.find_one({"userId": user_id})
+	scores_dict = scores["top_friends_scores"]
+	if not scores_dict:
+		scores_dict = {}
+
+	for friend in friends_scores:
+		try:
+			scores_dict[str(friend[0])] += friend[1]
+		except KeyError:
+			scores_dict[str(friend[0])] = friend[1]
+	if scores:	
+		top_friends.update({"_id": ObjectId(scores["_id"])}, {"$set": {"top_friends_scores": scores_dict}})
+	else:
+		top_friends.insert({"userId": user_id, "top_friends_scores": scores_dict})
+
+	response = HttpResponse(json.dumps({"one": scores_dict["778138114"], "all": scores_dict}))
+	response["Access-Control-Allow-Origin"] = "*"
+	response["Access-Control-Allow-Methods"] = "POST, GET, OPTIONS"
+	response["Access-Control-Max-Age"] = "1000"
+	response["Access-Control-Allow-Headers"] = "*"
+
+	return response
 
 @csrf_exempt
 def uploadAnswers(request):	
@@ -40,9 +68,6 @@ def uploadAnswers(request):
 
 def getRecVector(request, userId):
 	return HttpResponse('sup')
-
-#def updateRecVector(userId, )
-
 
 def processAnswerQueue(request):
 	# group the answers
