@@ -71,9 +71,11 @@ def uploadAnswers(request):
 					"chosenProduct": current_row["chosenProduct"], 
 					"wrongProduct": current_row["wrongProduct"]
 			})
+		response = HttpResponse(str(json.dumps(to_insert)))
 		if (len(to_insert) > 0):
 			answer_queue.insert(to_insert)			
-		return processAnswerQueue()
+		return response
+		#return processAnswerQueue()
 		return HttpResponse('Inserted into answer queue')
 	return HttpResponse("Not a POST request")
 
