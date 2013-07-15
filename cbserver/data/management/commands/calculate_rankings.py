@@ -34,7 +34,7 @@ class Command(BaseCommand):
 				if (not user_rec):
 					return
 				calc_rating = 0 
-				calc_weight = 0
+				calc_weight = 1
 				for product, rating in user_rec.iteritems():
 					if (not (product == "userId" or product == "_id")):
 						# determine if the new product was in the			
@@ -49,7 +49,7 @@ class Command(BaseCommand):
 							calc_rating += (rating + dif_doc["dif"]) * dif_doc["freq"]
 							calc_weight += dif_doc["freq"]
 				# update user calc_rec vector for given product
-				to_update[product_id] = calc_rating/calc_weight
+				to_update[str(product_id)] = calc_rating/calc_weight
 				print to_update
 				calc_recs.update({"userId": user_id}, {"$set": to_update}, True)
 

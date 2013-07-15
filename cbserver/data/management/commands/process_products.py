@@ -27,12 +27,22 @@ class Command(BaseCommand):
 
 		product_records = products_to_process.find()
 		for product_r in product_records:
+			self.stdout.write(product_r["userId"])
+			self.stdout.write(str(product_r["product"]))
 			user_id = product_r["userId"]
 			product_id = product_r["product"]
+			
+			# set up user queue
+			user = users_to_update_collection.find_one({"user_id": user_id})
+			if (not user):
+				self.stdout.write("Not a user")
+				users_to_update_collection.insert({"user_id": user_id})
+			
 			user_rec = rec_collection.find_one({"userId": user_id})
 			if (not user_rec):
-				print "Not a user rec"
-				return 
+				self.stdout.write("Not a user_rec")
+				continue 
+
 			for product, rating in user_rec.iteritems():
 				if (not (product == "userId" or product == "_id" or product == product_id)):
 					product_1 = product_id
@@ -40,11 +50,9 @@ class Command(BaseCommand):
 					if (int(product_id) > int(product)):
 						product_1 = product
 						product_2 = product_id
-					dif = user_rec[product_1] - user_rec[product_2]
+					dif = user_rec[str(product_1)] - user_rec[str(product_2)]
 					dif_collection.update({"product1": product_1, "product2": product_2}, {"$inc": {"freq": 1, "dif": dif}}, True)
 			products_to_process.remove({"_id": ObjectId(product_r["_id"])})	
 			
 			# set up user queue			 			
-			user = users_to_update_collection.find({"user_id": user_id)
-			if not user:
-				users_to_update_collection.insert({"user_id": user_id})
+		

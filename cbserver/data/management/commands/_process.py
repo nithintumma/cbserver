@@ -145,4 +145,4 @@ def calculate_elo_rank(player_a_rank=1600, player_b_rank=1600, winner=PLAYER_A, 
 #processAnswerQueue()
 #processProductQueue()
 #updateUniqueProducts()
-generateCalculatedRatings("551733910")
+#generateCalculatedRatings("551733910")
