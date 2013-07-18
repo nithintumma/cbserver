@@ -11,6 +11,7 @@ from pymongo import DESCENDING
 import pymongo as pm
 
 from bson.objectid import ObjectId
+import time
 
 class Command(BaseCommand):
 
@@ -27,15 +28,13 @@ class Command(BaseCommand):
 
 		product_records = products_to_process.find()
 		for product_r in product_records:
-			self.stdout.write(product_r["userId"])
-			self.stdout.write(str(product_r["product"]))
+			start = time.time()
 			user_id = product_r["userId"]
 			product_id = product_r["product"]
 			
 			# set up user queue
 			user = users_to_update_collection.find_one({"user_id": user_id})
 			if (not user):
-				self.stdout.write("Not a user")
 				users_to_update_collection.insert({"user_id": user_id})
 			
 			user_rec = rec_collection.find_one({"userId": user_id})
@@ -53,6 +52,7 @@ class Command(BaseCommand):
 					dif = user_rec[str(product_1)] - user_rec[str(product_2)]
 					dif_collection.update({"product1": product_1, "product2": product_2}, {"$inc": {"freq": 1, "dif": dif}}, True)
 			products_to_process.remove({"_id": ObjectId(product_r["_id"])})	
-			
-			# set up user queue			 			
+			end = time.time()
+			elapsed = end - start
+			self.stdout.write(str(elapsed))
 		

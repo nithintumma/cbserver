@@ -15,6 +15,8 @@ import json
 from django.views.decorators.csrf import csrf_exempt
 import requests
 
+from utils import calculate_ranking
+
 # open up 
 client = MongoClient()
 db = client.data
@@ -135,6 +137,14 @@ def processAnswerQueue():
 	return sendTopFriends(list(set(mod_ids)))
 	return HttpResponse("Completed updating")
 
+@csrf_exempt
+def updateRecVector(request, user_id):
+	# code for updating rec vector goes here	
+	updated = calculate_ranking(user_id)
+	if updated:
+		return HttpResponse("Updated")
+	else:
+		return HttpResposne("Not Updated", status=500)
 
 # ------- ELO RANKING SORES
 PLAYER_A = 1
