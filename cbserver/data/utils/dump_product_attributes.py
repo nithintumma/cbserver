@@ -18,6 +18,7 @@ db = client.data
 product_attributes_collection = db.product_attributes
 
 p_attribute_list = list(product_attributes_collection.find())
+print p_attribute_list
 
 unique_attributes = Set([])
 for p_attribute in p_attribute_list:
@@ -28,6 +29,7 @@ pickle.dump(unique_attributes, open("dumps/attributes.p", "wb"))
 
 product_attributes_dict = {}
 for product_attribute in p_attribute_list:
+	print product_attribute
 	product = product_attribute["product"]
 	attributes = product_attribute["attributes"]
 	to_add = []

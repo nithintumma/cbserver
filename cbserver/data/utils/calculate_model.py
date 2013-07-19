@@ -46,13 +46,12 @@ def calculate_rankings(user_id):
 			rated_product_attributes.append(product_attributes[str(product)])
 			rec_list.append(rec)
 		except:
+			print product
 			continue
 	X = np.array(rated_product_attributes)
 	y = np.array(rec_list)
 	y -= y.mean()
 	X = sm.add_constant(X, prepend=False)
-	print  X
-	print  y
 
 	model = sm.OLS(y, X).fit()
 	coeffs = model.params	
@@ -67,13 +66,15 @@ def calculate_rankings(user_id):
 				scores.append(attributes[attr])
 			except:
 				scores.append(0.0)
-		scores.append(1.0)
+	#	scores.append(1.0)
 		scores = np.array(scores)
 		print scores 
 		print coeffs
 		to_update[str(rec)] = float(coeffs.dot(scores))
 	
 	model_rankings.update({"userId": user_id}, {"$set": to_update}, True)
-	return to_update
+	r_sq = model.rsquared
+	to_insert = [(k, v, r_sq) for v, k in sorted([(v, k) for k, v in to_update.items()])]	
+	return to_insert
 
-print calculate_rankings("48947135361")
+#print calculate_rankings("123")

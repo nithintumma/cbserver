@@ -1,6 +1,16 @@
 (lp1
-V1
+Vurban
+p2
+aVmainstream
+p3
+aVhealthy
+p4
+aV1
 aV3
 aV2
 aV4
+aVspending_habits
+p5
+aVdiy
+p6
 a.

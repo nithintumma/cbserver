@@ -14,8 +14,8 @@ from bson.objectid import ObjectId
 import json
 from django.views.decorators.csrf import csrf_exempt
 import requests
-
-from utils import calculate_ranking
+import utils.calculate_model as model
+import utils.calculate_ranking as cf
 
 # open up 
 client = MongoClient()
@@ -24,6 +24,9 @@ answer_queue = db.answer_queue
 rec_collection = db.recs
 top_friends = db.top_friends
 
+@csrf_exempt 
+def hello(request):
+	return HttpResponse("hello")
 
 def updateDBTopFriends(user_id, friends_scores, send=False):	
 	scores = top_friends.find_one({"userId": user_id})
@@ -140,11 +143,17 @@ def processAnswerQueue():
 @csrf_exempt
 def updateRecVector(request, user_id):
 	# code for updating rec vector goes here	
-	updated = calculate_ranking(user_id)
+	#updated = calculate_ranking(user_id)
+	updated = cf.calculate_ranking(user_id)
 	if updated:
 		return HttpResponse("Updated")
 	else:
-		return HttpResposne("Not Updated", status=500)
+		return HttpResponse("Not Updated", status=500)
+
+@csrf_exempt
+def generateRecModel(request,user_id):
+	recs = model.calculate_ranking(user_id)
+	return HttpResponse(json.dumps(recs), mimetype = "application/json")
 
 # ------- ELO RANKING SORES
 PLAYER_A = 1
